@@ -3,5 +3,5 @@
  */
 
 export function hello(name?: string): string {
-  return `Hello, ${name || 'World'}!`;
-} 
+	return `Hello, ${name || 'World'}!`
+}
