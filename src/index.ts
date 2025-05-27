@@ -3,4 +3,4 @@
  * Client library for Nextnode Functions
  */
 
-export * from './client'
+export * from './client.js'

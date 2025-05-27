@@ -1,6 +1,8 @@
 {
 	"compilerOptions": {
+		"baseUrl": ".",
 		"outDir": "dist",
+		"project": "true",
 		"target": "es2022",
 		"moduleDetection": "force",
 		"module": "NodeNext",
