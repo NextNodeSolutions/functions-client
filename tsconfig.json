@@ -19,5 +19,13 @@
 		"lib": ["es2022", "dom", "dom.iterable"]
 	},
 	"include": ["src/**/*"],
-	"exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+	"exclude": ["node_modules", "dist"],
+	"references": [
+		{
+			"path": "./tsconfig.vitest.json"
+		},
+		{
+			"path": "./tsconfig.eslint.json"
+		}
+	]
 }

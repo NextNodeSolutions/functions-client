@@ -3,4 +3,4 @@
  * Client library for Nextnode Functions
  */
 
-export * from './client.js'
+export * from './formatting/date.js'
