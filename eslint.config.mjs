@@ -3,6 +3,9 @@ import nextnodeEslint from '@nextnode/eslint-plugin/base'
 export default [
 	...nextnodeEslint,
 	{
+		ignores: ['dist/**/*'],
+	},
+	{
 		files: ['**/*.ts', '**/*.tsx'],
 		languageOptions: {
 			parserOptions: {
@@ -14,7 +17,7 @@ export default [
 		files: ['**/*.test.ts', '**/*.spec.ts'],
 		languageOptions: {
 			parserOptions: {
-				project: './tsconfig.test.json',
+				project: './tsconfig.vitest.json',
 			},
 		},
 	},
