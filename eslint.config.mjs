@@ -13,12 +13,4 @@ export default [
 			},
 		},
 	},
-	{
-		files: ['**/*.test.ts', '**/*.spec.ts'],
-		languageOptions: {
-			parserOptions: {
-				project: './tsconfig.vitest.json',
-			},
-		},
-	},
 ]

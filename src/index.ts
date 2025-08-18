@@ -4,4 +4,4 @@
  */
 
 // UI Utilities
-export { cn } from './utils/classnames.js'
+export { cn } from './utils/classnames'

@@ -1,54 +1,33 @@
 {
 	"compilerOptions": {
-		// Output & Module System
-		"target": "ES2022",
+		"target": "ES2023",
 		"module": "ESNext",
 		"moduleResolution": "bundler",
-		"outDir": "dist",
-		"rootDir": "src",
+		"lib": ["ES2023", "DOM", "DOM.Iterable"],
 
-		// Library Generation
-		"declaration": true,
-		"declarationMap": true,
-		"sourceMap": true,
-
-		// Modern ESM
-		"allowSyntheticDefaultImports": true,
-		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true,
-		"isolatedModules": true,
-		"verbatimModuleSyntax": true,
-
-		// Type Safety
+		// Type Safety Maximum - 100% Typé
 		"strict": true,
 		"noUncheckedIndexedAccess": true,
+		"exactOptionalPropertyTypes": true,
 		"noImplicitOverride": true,
 		"noImplicitReturns": true,
 		"noFallthroughCasesInSwitch": true,
 		"noUncheckedSideEffectImports": true,
 
-		// Performance & Compatibility
+		// 100% ECMAScript - Library Ready
+		"isolatedModules": true,
+		"verbatimModuleSyntax": true,
+		"forceConsistentCasingInFileNames": true,
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"allowJs": false,
-		"resolveJsonModule": true,
 
-		// Environment
-		"lib": ["ES2022", "DOM", "DOM.Iterable"]
+		// DEV: Validation uniquement (pas de génération)
+		"noEmit": true,
+		"types": ["node"]
 	},
 	"include": ["src/**/*.ts"],
-	"exclude": [
-		"node_modules",
-		"dist",
-		"**/*.test.ts",
-		"**/*.spec.ts",
-		"**/*.d.ts"
-	],
-	"references": [
-		{
-			"path": "./tsconfig.vitest.json"
-		},
-		{
-			"path": "./tsconfig.eslint.json"
-		}
-	]
+	"exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }
