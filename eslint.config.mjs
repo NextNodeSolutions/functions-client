@@ -3,7 +3,7 @@ import nextnodeEslint from '@nextnode/eslint-plugin/base'
 export default [
 	...nextnodeEslint,
 	{
-		ignores: ['dist/**/*'],
+		ignores: ['dist/**/*', 'coverage/**/*'],
 	},
 	{
 		files: ['**/*.ts', '**/*.tsx'],
