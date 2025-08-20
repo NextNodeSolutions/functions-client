@@ -31,8 +31,8 @@ importers:
         specifier: ^19.1.0
         version: 19.8.1
       '@nextnode/eslint-plugin':
-        specifier: ^1.1.0
-        version: 1.1.0(eslint@9.27.0(jiti@2.4.2))
+        specifier: ^1.2.0
+        version: 1.2.0(eslint@9.27.0(jiti@2.4.2))
       '@testing-library/jest-dom':
         specifier: ^6.6.3
         version: 6.6.3
@@ -92,6 +92,10 @@ packages:
 
   '@babel/runtime@7.27.3':
     resolution: {integrity: sha512-7EYtGezsdiDMyY80+65EzwiGmcJqpmcZCojSXaRgdrBaGtWTgDZKq69cPIVped6MkIM78cTQ2GOiEYjwOlG4xw==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/runtime@7.28.3':
+    resolution: {integrity: sha512-9uIQ10o0WGdpP6GDhXcdOJPJuDgFtIDtN/9+ArJQ2NAfAmiuhTQdzkaTGR33v43GYS2UrSA0eX2pPPHoFVvpxA==}
     engines: {node: '>=6.9.0'}
 
   '@babel/types@7.27.3':
@@ -540,8 +544,8 @@ packages:
   '@next/eslint-plugin-next@15.3.2':
     resolution: {integrity: sha512-ijVRTXBgnHT33aWnDtmlG+LJD+5vhc9AKTJPquGG5NKXjpKNjc62woIhFtrAcWdBobt8kqjCoaJ0q6sDQoX7aQ==}
 
-  '@nextnode/eslint-plugin@1.1.0':
-    resolution: {integrity: sha512-vFfyjdvZQ9OJlDEWe7wI+egIpc7FbelqQDkpcjRp2EG2b1OXCtYGAZBOO474IbrRJpB0r6VuoTA0M0gmFEWGBg==}
+  '@nextnode/eslint-plugin@1.2.0':
+    resolution: {integrity: sha512-aXwB0+aHPr2iWKpvj/bXsBKnl4OrW9S0C9YCTQXsPsw9jbOBaYlqgTr9QMIpQK/4gKyS1nO+iQcaEr7XF50NhA==}
     engines: {node: '>= 20.0.0'}
     peerDependencies:
       eslint: ^9.22.0
@@ -2786,6 +2790,8 @@ snapshots:
 
   '@babel/runtime@7.27.3': {}
 
+  '@babel/runtime@7.28.3': {}
+
   '@babel/types@7.27.3':
     dependencies:
       '@babel/helper-string-parser': 7.27.1
@@ -3298,7 +3304,7 @@ snapshots:
     dependencies:
       fast-glob: 3.3.1
 
-  '@nextnode/eslint-plugin@1.1.0(eslint@9.27.0(jiti@2.4.2))':
+  '@nextnode/eslint-plugin@1.2.0(eslint@9.27.0(jiti@2.4.2))':
     dependencies:
       '@eslint/js': 9.27.0
       '@next/eslint-plugin-next': 15.3.2
@@ -3398,7 +3404,7 @@ snapshots:
   '@testing-library/dom@10.4.0':
     dependencies:
       '@babel/code-frame': 7.27.1
-      '@babel/runtime': 7.27.3
+      '@babel/runtime': 7.28.3
       '@types/aria-query': 5.0.4
       aria-query: 5.3.0
       chalk: 4.1.2
