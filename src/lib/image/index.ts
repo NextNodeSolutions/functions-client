@@ -3,6 +3,8 @@
  * Reusable image processing utilities for all NextNode projects
  */
 
+// Adapters
+export * from './adapters/index.js'
 // Cache strategies
 export * from './cache.js'
 // Types
