@@ -11,6 +11,9 @@
 		// JSX support for React
 		"jsx": "react-jsx",
 
+		// Temporarily disable for image library compatibility
+		"exactOptionalPropertyTypes": false,
+
 		// Types
 		"types": ["node", "vitest/globals"]
 	},

@@ -9,7 +9,21 @@ export * from './adapters/index.js'
 export * from './cache.js'
 // React components and hooks
 export * from './components/index.js'
-// Types
-export type * from './types.js'
+// Types (excluding OptimizedImage to avoid conflict with component)
+// Export OptimizedImage type with alias to avoid conflict
+export type {
+	BatchOptimizationResult,
+	CacheStrategyConfig,
+	CompressionProfile,
+	ImageFormat,
+	ImageOptimizationOptions,
+	ImageQualityConfig,
+	ImageSource,
+	ImageValidationConfig,
+	ImageValidationResult,
+	LQIPConfig,
+	OptimizedImage as OptimizedImageType,
+	ResponsiveImageConfig,
+} from './types.js'
 // Core utilities
 export * from './utils/index.js'

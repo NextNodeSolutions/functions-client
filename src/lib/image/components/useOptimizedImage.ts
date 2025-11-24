@@ -163,21 +163,16 @@ export interface ResponsiveImageVariant {
 	images: OptimizedImage[]
 }
 
-export interface PictureSource {
-	media: string
-	srcSet: string
-	type?: string
-}
+// Re-export PictureSource from utils to avoid duplication
+export type { PictureSource } from '../utils/index.js'
 
-export function useResponsiveImageVariants(
-	variants: ResponsiveImageVariant[],
-): PictureSource[] {
+export function useResponsiveImageVariants(variants: ResponsiveImageVariant[]) {
 	return useMemo(
 		() =>
 			variants.map(({ media, images }) => ({
 				media,
 				srcSet: generateSrcSet(images),
-				type: images[0] ? `image/${images[0].format}` : undefined,
+				...(images[0]?.format && { type: `image/${images[0].format}` }),
 			})),
 		[variants],
 	)
