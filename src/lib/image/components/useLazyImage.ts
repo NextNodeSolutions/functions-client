@@ -45,7 +45,7 @@ export interface UseLazyImageResult {
 	error: Error | null
 
 	/** Ref to attach to img element */
-	ref: React.RefObject<HTMLImageElement>
+	ref: React.RefObject<HTMLImageElement | null>
 
 	/** Inline styles for blur transition */
 	style: React.CSSProperties
@@ -93,7 +93,9 @@ export function useLazyImage(
 		setError(null)
 		onLoadStart?.()
 
-		const img = new Image()
+		const img = globalThis.Image
+			? new globalThis.Image()
+			: ({ onload: null, onerror: null, src: '' } as HTMLImageElement)
 
 		img.onload = () => {
 			setCurrentSrc(src)
@@ -252,7 +254,7 @@ export interface UseBackgroundImageResult {
 	isLoaded: boolean
 
 	/** Ref to attach to element */
-	ref: React.RefObject<HTMLDivElement>
+	ref: React.RefObject<HTMLDivElement | null>
 }
 
 export function useBackgroundImage(

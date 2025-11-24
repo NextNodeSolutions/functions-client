@@ -78,6 +78,12 @@ export function getQualityForFormat(
 	}
 
 	const qualityConfig = getQualityProfile(profile)
+
+	// SVG doesn't have quality setting
+	if (format === 'svg') {
+		return 100
+	}
+
 	return qualityConfig[format] ?? DEFAULT_QUALITY.webp
 }
 

@@ -79,8 +79,8 @@ export class CDNImageAdapter extends BaseImageAdapter {
 		const url = this.buildCDNUrl(sourceString, {
 			format,
 			quality,
-			width: options.width,
-			height: options.height,
+			...(options.width && { width: options.width }),
+			...(options.height && { height: options.height }),
 		})
 
 		// Return optimized image (dimensions are estimates)

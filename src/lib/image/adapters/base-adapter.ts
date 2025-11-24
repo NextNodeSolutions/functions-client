@@ -87,6 +87,7 @@ export abstract class BaseImageAdapter implements ImageAdapter {
 
 		results.forEach((result, index) => {
 			const input = sources[index]
+			if (!input) return
 
 			if (result.status === 'fulfilled') {
 				successful.push({ input, output: result.value })

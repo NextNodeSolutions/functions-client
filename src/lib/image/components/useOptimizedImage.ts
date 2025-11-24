@@ -80,6 +80,10 @@ export function useOptimizedImage(
 	const images = Array.isArray(image) ? image : [image]
 	const primaryImage = images[0]
 
+	if (!primaryImage) {
+		throw new Error('At least one image is required')
+	}
+
 	const {
 		breakpoints = DEFAULT_BREAKPOINTS,
 		densities = DEFAULT_DENSITIES,
@@ -127,8 +131,8 @@ export function useOptimizedImage(
 		srcSet,
 		sizes: sizesAttr,
 		loading,
-		fetchPriority,
-		lqip,
+		...(fetchPriority && { fetchPriority }),
+		...(lqip && { lqip }),
 		width: primaryImage.width,
 		height: primaryImage.height,
 		format: primaryImage.format,

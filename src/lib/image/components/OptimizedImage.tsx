@@ -79,13 +79,13 @@ export function OptimizedImage({
 	const optimized = useOptimizedImage(image, {
 		sizes,
 		loading,
-		fetchPriority,
-		lqip,
+		...(fetchPriority && { fetchPriority }),
+		...(lqip && { lqip }),
 	})
 
 	// Use lazy loading if enabled and placeholder provided
 	const lazy = useLazyImage(optimized.src, {
-		placeholder: lqip,
+		...(lqip && { placeholder: lqip }),
 		rootMargin: '50px',
 	})
 
@@ -225,7 +225,7 @@ export function OptimizedBackgroundImage({
 	style,
 }: OptimizedBackgroundImageProps): React.ReactElement {
 	const lazy = useLazyImage(image.src, {
-		placeholder: lqip,
+		...(lqip && { placeholder: lqip }),
 		rootMargin: '100px',
 	})
 
