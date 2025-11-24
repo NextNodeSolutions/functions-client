@@ -3,4 +3,9 @@
  * Client library for Nextnode Functions
  */
 
-export * from './formatting/date.js'
+// Core functionality
+export * from './lib/core.js'
+// Type definitions
+export * from './types/index.js'
+// Utility functions
+export * from './utils/utils.js'

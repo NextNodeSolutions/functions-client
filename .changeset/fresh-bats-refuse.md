@@ -2,4 +2,4 @@
 '@nextnode/functions-client': patch
 ---
 
-Base config
+Updated to last Nextnode Standards
