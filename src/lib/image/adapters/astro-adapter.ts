@@ -35,6 +35,7 @@ interface ImageMetadata {
 	width: number
 	height: number
 	format: ImageFormat
+	fsPath?: string // Optional property from Astro 5
 }
 
 interface AstroImageResult {
@@ -83,13 +84,25 @@ export class AstroImageAdapter extends BaseImageAdapter {
 	}
 
 	async optimize(
-		source: ImageSource,
+		source: ImageSource | ImageMetadata,
 		options: ImageOptimizationOptions = {},
 	): Promise<OptimizedImage> {
 		try {
-			const sourceString = this.getSourceString(source)
+			// Handle ImageMetadata objects directly (return as-is)
+			// ImageMetadata objects are already processed by Astro during import
+			// and should not be passed through getImage() again
+			if (this.isImageMetadata(source)) {
+				// Return ImageMetadata as-is - it's already optimized by Astro
+				return {
+					src: source.src,
+					width: source.width,
+					height: source.height,
+					format: source.format,
+				}
+			}
 
-			// Detect format
+			// Handle string sources (URLs, file paths)
+			const sourceString = this.getSourceString(source)
 			const detectedFormat = detectImageFormat(sourceString)
 			const format = options.format || detectedFormat || 'webp'
 
@@ -106,7 +119,7 @@ export class AstroImageAdapter extends BaseImageAdapter {
 				options.quality,
 			)
 
-			// Build Astro options
+			// Build Astro options for string sources
 			const astroOptions: AstroImageOptions = {
 				src: sourceString,
 				format,
@@ -121,7 +134,7 @@ export class AstroImageAdapter extends BaseImageAdapter {
 				astroOptions.height = options.height
 			}
 
-			// Call Astro's getImage
+			// Call Astro's getImage only for string sources
 			const result = await this.getImage(astroOptions)
 
 			return {
@@ -136,14 +149,20 @@ export class AstroImageAdapter extends BaseImageAdapter {
 	}
 
 	async generateLQIP(
-		source: ImageSource,
+		source: ImageSource | ImageMetadata,
 		config: Partial<LQIPConfig> = {},
 	): Promise<string> {
 		try {
-			const sourceString = this.getSourceString(source)
 			const lqipConfig = mergeLQIPConfig(config)
 
-			// Generate tiny version using Astro
+			if (this.isImageMetadata(source)) {
+				// For ImageMetadata, return the src as-is
+				// LQIP generation not supported for ImageMetadata in this adapter
+				return source.src
+			}
+
+			// Generate tiny version using Astro for string sources
+			const sourceString = this.getSourceString(source)
 			const result = await this.getImage({
 				src: sourceString,
 				width: lqipConfig.width,
@@ -165,6 +184,22 @@ export class AstroImageAdapter extends BaseImageAdapter {
 		// Astro supports all major web formats via Sharp
 		return ['svg', 'png', 'webp', 'avif', 'jpeg', 'jpg'].includes(
 			format.toLowerCase(),
+		)
+	}
+
+	/**
+	 * Type guard to check if source is ImageMetadata
+	 */
+	private isImageMetadata(
+		source: ImageSource | ImageMetadata,
+	): source is ImageMetadata {
+		return (
+			typeof source === 'object' &&
+			source !== null &&
+			'src' in source &&
+			'width' in source &&
+			'height' in source &&
+			typeof source.width === 'number'
 		)
 	}
 
@@ -194,13 +229,17 @@ export class AstroImageAdapter extends BaseImageAdapter {
  * Convenience function to optimize images with Astro
  * Matches the API from nextnode-front's image-optimizer.ts
  */
-export async function optimizeImages<T extends Record<string, ImageSource>>(
+export async function optimizeImages<
+	T extends Record<string, ImageSource | ImageMetadata>,
+>(
 	images: T,
 	getImage: AstroGetImageFunction,
 ): Promise<{ [K in keyof T]: OptimizedImage }> {
 	const adapter = AstroImageAdapter.create(getImage)
 
-	const entries = Object.entries(images) as Array<[keyof T, ImageSource]>
+	const entries = Object.entries(images) as Array<
+		[keyof T, ImageSource | ImageMetadata]
+	>
 	const results = await Promise.allSettled(
 		entries.map(async ([key, source]) => ({
 			key,
