@@ -14,6 +14,7 @@ describe('LQIP Security - XSS Prevention', () => {
 
 	beforeEach(() => {
 		defaultConfig = {
+			enabled: true,
 			width: 20,
 			height: 20,
 			quality: 20,

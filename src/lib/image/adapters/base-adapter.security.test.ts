@@ -25,8 +25,14 @@ class TestImageAdapter extends BaseImageAdapter {
 		options?: ImageOptimizationOptions,
 	): Promise<OptimizedImage> {
 		this.validateDimensions(options?.width, options?.height)
+		const src =
+			typeof source === 'string'
+				? source
+				: Buffer.isBuffer(source)
+					? 'buffer'
+					: source.src
 		return {
-			src: typeof source === 'string' ? source : source.src,
+			src,
 			width: options?.width || 0,
 			height: options?.height || 0,
 			format: options?.format || 'webp',
@@ -38,7 +44,11 @@ class TestImageAdapter extends BaseImageAdapter {
 		config?: Partial<LQIPConfig>,
 	): Promise<string> {
 		this.validateDimensions(config?.width, config?.height)
-		return typeof source === 'string' ? source : source.src
+		return typeof source === 'string'
+			? source
+			: Buffer.isBuffer(source)
+				? 'buffer'
+				: source.src
 	}
 
 	supportsFormat(format: string): boolean {
