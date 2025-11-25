@@ -9,6 +9,21 @@
 export type ImageFormat = 'svg' | 'png' | 'webp' | 'avif' | 'jpeg' | 'jpg'
 
 /**
+ * Security limits to prevent DoS attacks
+ * Protects against memory exhaustion and resource abuse
+ */
+export const SECURITY_LIMITS = {
+	/** Maximum image file size: 50MB */
+	MAX_FILE_SIZE: 50 * 1024 * 1024,
+	/** Maximum image width: 10000px */
+	MAX_WIDTH: 10000,
+	/** Maximum image height: 10000px */
+	MAX_HEIGHT: 10000,
+	/** Maximum total pixels (width * height): 100 megapixels */
+	MAX_PIXELS: 100 * 1024 * 1024,
+} as const
+
+/**
  * Optimized image result
  */
 export interface OptimizedImage {

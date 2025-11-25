@@ -10,6 +10,7 @@ import type {
 	LQIPConfig,
 	OptimizedImage,
 } from '../types.js'
+import { SECURITY_LIMITS } from '../types.js'
 
 /**
  * Base image adapter interface
@@ -139,5 +140,33 @@ export abstract class BaseImageAdapter implements ImageAdapter {
 		return new Error(
 			`[${this.adapterName}] ${operation} failed: ${message}`,
 		)
+	}
+
+	/**
+	 * Validate image dimensions against security limits
+	 * Prevents DoS attacks through oversized image requests
+	 */
+	protected validateDimensions(width?: number, height?: number): void {
+		if (width !== undefined && width > SECURITY_LIMITS.MAX_WIDTH) {
+			throw new Error(
+				`Image width ${width}px exceeds maximum allowed: ${SECURITY_LIMITS.MAX_WIDTH}px`,
+			)
+		}
+
+		if (height !== undefined && height > SECURITY_LIMITS.MAX_HEIGHT) {
+			throw new Error(
+				`Image height ${height}px exceeds maximum allowed: ${SECURITY_LIMITS.MAX_HEIGHT}px`,
+			)
+		}
+
+		if (
+			width !== undefined &&
+			height !== undefined &&
+			width * height > SECURITY_LIMITS.MAX_PIXELS
+		) {
+			throw new Error(
+				`Image dimensions ${width}x${height} (${width * height} pixels) exceed maximum allowed: ${SECURITY_LIMITS.MAX_PIXELS} pixels`,
+			)
+		}
 	}
 }

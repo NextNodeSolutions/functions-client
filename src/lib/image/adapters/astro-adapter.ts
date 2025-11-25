@@ -88,6 +88,9 @@ export class AstroImageAdapter extends BaseImageAdapter {
 		options: ImageOptimizationOptions = {},
 	): Promise<OptimizedImage> {
 		try {
+			// Validate dimensions against security limits
+			this.validateDimensions(options.width, options.height)
+
 			// Handle ImageMetadata objects directly (return as-is)
 			// ImageMetadata objects are already processed by Astro during import
 			// and should not be passed through getImage() again

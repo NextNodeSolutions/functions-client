@@ -65,6 +65,9 @@ export class CDNImageAdapter extends BaseImageAdapter {
 		source: ImageSource,
 		options: ImageOptimizationOptions = {},
 	): Promise<OptimizedImage> {
+		// Validate dimensions against security limits
+		this.validateDimensions(options.width, options.height)
+
 		const sourceString = this.getSourceString(source)
 
 		// Detect format
