@@ -59,7 +59,6 @@ export function getQualityProfile(
 			return LOSSLESS_QUALITY
 		case 'aggressive':
 			return AGGRESSIVE_QUALITY
-		case 'balanced':
 		default:
 			return DEFAULT_QUALITY
 	}

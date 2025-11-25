@@ -300,41 +300,4 @@ export class CDNImageAdapter extends BaseImageAdapter {
 
 		return `${this.baseUrl}/${paramsString}/${source}`
 	}
-
-	/**
-	 * Factory method for Cloudflare Images
-	 */
-	static createCloudflare(
-		baseUrl: string,
-		accountId?: string,
-	): CDNImageAdapter {
-		return new CDNImageAdapter({
-			provider: 'cloudflare',
-			baseUrl,
-			accountId,
-		})
-	}
-
-	/**
-	 * Factory method for Imgix
-	 */
-	static createImgix(baseUrl: string): CDNImageAdapter {
-		return new CDNImageAdapter({
-			provider: 'imgix',
-			baseUrl,
-		})
-	}
-
-	/**
-	 * Factory method for Cloudinary
-	 */
-	static createCloudinary(
-		baseUrl: string,
-		cloudName: string,
-	): CDNImageAdapter {
-		return new CDNImageAdapter({
-			provider: 'cloudinary',
-			baseUrl: `${baseUrl}/${cloudName}`,
-		})
-	}
 }

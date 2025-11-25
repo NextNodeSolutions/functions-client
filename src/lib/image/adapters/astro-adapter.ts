@@ -219,13 +219,6 @@ export class AstroImageAdapter extends BaseImageAdapter {
 			format: 'svg',
 		}
 	}
-
-	/**
-	 * Helper to create adapter instance (factory pattern)
-	 */
-	static create(getImage: AstroGetImageFunction): AstroImageAdapter {
-		return new AstroImageAdapter({ getImage })
-	}
 }
 
 /**
@@ -238,7 +231,7 @@ export async function optimizeImages<
 	images: T,
 	getImage: AstroGetImageFunction,
 ): Promise<{ [K in keyof T]: OptimizedImage }> {
-	const adapter = AstroImageAdapter.create(getImage)
+	const adapter = new AstroImageAdapter({ getImage })
 
 	const entries = Object.entries(images) as Array<
 		[keyof T, ImageSource | ImageMetadata]
