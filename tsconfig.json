@@ -8,11 +8,21 @@
 			"@/types/*": ["./types/*"]
 		},
 
+		// JSX support for React
+		"jsx": "react-jsx",
+
+		// Temporarily disable for image library compatibility
+		"exactOptionalPropertyTypes": false,
+
+		// DOM types for React components
+		"lib": ["ES2022", "DOM", "DOM.Iterable"],
+
 		// Types
 		"types": ["node", "vitest/globals"]
 	},
 	"include": [
 		"src/**/*.ts",
+		"src/**/*.tsx",
 		"src/**/*.test.ts",
 		"src/**/*.spec.ts",
 		"types/**/*.ts",
