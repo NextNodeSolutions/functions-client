@@ -88,10 +88,14 @@ export function useLazyImage(
 	const [error, setError] = useState<Error | null>(null)
 	const [currentSrc, setCurrentSrc] = useState(placeholder || src)
 
+	// Stable refs for callbacks to prevent unnecessary re-renders
+	const callbacksRef = useRef({ onLoadStart, onLoadComplete, onError })
+	callbacksRef.current = { onLoadStart, onLoadComplete, onError }
+
 	const loadImage = useCallback(() => {
 		setIsLoading(true)
 		setError(null)
-		onLoadStart?.()
+		callbacksRef.current.onLoadStart?.()
 
 		const img = globalThis.Image
 			? new globalThis.Image()
@@ -101,27 +105,34 @@ export function useLazyImage(
 			setCurrentSrc(src)
 			setIsLoaded(true)
 			setIsLoading(false)
-			onLoadComplete?.()
+			callbacksRef.current.onLoadComplete?.()
 		}
 
 		img.onerror = () => {
 			const err = new Error(`Failed to load image: ${src}`)
 			setError(err)
 			setIsLoading(false)
-			onError?.(err)
+			callbacksRef.current.onError?.(err)
 		}
 
 		img.src = src
-	}, [src, onLoadStart, onLoadComplete, onError])
+
+		return () => {
+			// Cleanup: abort loading if component unmounts
+			img.src = ''
+		}
+	}, [src])
 
 	useEffect(() => {
 		const imgElement = imgRef.current
 		if (!imgElement) return
 
+		let cleanup: (() => void) | undefined
+
 		// If no placeholder, load immediately
 		if (!placeholder) {
-			loadImage()
-			return
+			cleanup = loadImage()
+			return cleanup
 		}
 
 		// Create IntersectionObserver
@@ -129,7 +140,7 @@ export function useLazyImage(
 			entries => {
 				for (const entry of entries) {
 					if (entry.isIntersecting) {
-						loadImage()
+						cleanup = loadImage()
 						observer.disconnect()
 						break
 					}
@@ -145,6 +156,7 @@ export function useLazyImage(
 
 		return () => {
 			observer.disconnect()
+			cleanup?.()
 		}
 	}, [placeholder, rootMargin, threshold, loadImage])
 
