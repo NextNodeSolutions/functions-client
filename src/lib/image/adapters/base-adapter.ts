@@ -3,6 +3,9 @@
  * Allows different platforms (Astro, Next.js, CDN) to implement their own optimization logic
  */
 
+import type { Logger } from '@nextnode/logger'
+import { createLogger } from '@nextnode/logger'
+
 import type {
 	BatchOptimizationResult,
 	ImageOptimizationOptions,
@@ -57,7 +60,13 @@ export interface ImageAdapter {
  * Abstract base adapter with common functionality
  */
 export abstract class BaseImageAdapter implements ImageAdapter {
-	constructor(protected readonly adapterName: string) {}
+	protected readonly logger: Logger
+
+	constructor(protected readonly adapterName: string) {
+		this.logger = createLogger({
+			prefix: `image:${adapterName}`,
+		})
+	}
 
 	abstract optimize(
 		source: ImageSource,
@@ -128,8 +137,7 @@ export abstract class BaseImageAdapter implements ImageAdapter {
 	 * Helper to log adapter operations
 	 */
 	protected log(message: string, data?: Record<string, unknown>): void {
-		// Basic logging - can be extended with proper logger
-		console.log(`[${this.adapterName}] ${message}`, data || '')
+		this.logger.info(message, data)
 	}
 
 	/**
