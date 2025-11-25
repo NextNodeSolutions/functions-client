@@ -118,6 +118,33 @@ export class CDNImageAdapter extends BaseImageAdapter {
 	}
 
 	/**
+	 * Sanitize and validate image source URL to prevent injection attacks
+	 * Prevents: path traversal, protocol injection, malicious URLs
+	 */
+	private sanitizeSource(source: string): string {
+		// Block path traversal attempts
+		if (source.includes('../') || source.includes('..\\')) {
+			throw new Error('Path traversal detected in image source')
+		}
+
+		// Block absolute paths (should be relative to CDN base)
+		if (source.startsWith('/')) {
+			throw new Error('Absolute paths not allowed, use relative paths')
+		}
+
+		// Validate it looks like an image path (basic extension check)
+		const validExtensions = /\.(jpg|jpeg|png|webp|avif|gif|svg)$/i
+		if (!validExtensions.test(source)) {
+			throw new Error(
+				'Invalid image source: must have valid image extension',
+			)
+		}
+
+		// Encode URI components to prevent injection
+		return encodeURIComponent(source)
+	}
+
+	/**
 	 * Build CDN transformation URL
 	 */
 	private buildCDNUrl(
@@ -156,6 +183,8 @@ export class CDNImageAdapter extends BaseImageAdapter {
 			height?: number
 		},
 	): string {
+		const safeSource = this.sanitizeSource(source)
+
 		const transformations: string[] = [
 			`format=${params.format}`,
 			`quality=${params.quality}`,
@@ -169,7 +198,7 @@ export class CDNImageAdapter extends BaseImageAdapter {
 			transformations.push(`height=${params.height}`)
 		}
 
-		return `${this.baseUrl}/cdn-cgi/image/${transformations.join(',')}/${source}`
+		return `${this.baseUrl}/cdn-cgi/image/${transformations.join(',')}/${safeSource}`
 	}
 
 	/**
@@ -185,6 +214,8 @@ export class CDNImageAdapter extends BaseImageAdapter {
 			height?: number
 		},
 	): string {
+		const safeSource = this.sanitizeSource(source)
+
 		const searchParams = new URLSearchParams()
 		searchParams.set('fm', params.format)
 		searchParams.set('q', params.quality.toString())
@@ -198,7 +229,7 @@ export class CDNImageAdapter extends BaseImageAdapter {
 			searchParams.set('h', params.height.toString())
 		}
 
-		return `${this.baseUrl}/${source}?${searchParams.toString()}`
+		return `${this.baseUrl}/${safeSource}?${searchParams.toString()}`
 	}
 
 	/**
@@ -214,6 +245,8 @@ export class CDNImageAdapter extends BaseImageAdapter {
 			height?: number
 		},
 	): string {
+		const safeSource = this.sanitizeSource(source)
+
 		const transformations: string[] = [
 			`f_${params.format}`,
 			`q_${params.quality}`,
@@ -227,7 +260,7 @@ export class CDNImageAdapter extends BaseImageAdapter {
 			transformations.push(`h_${params.height}`)
 		}
 
-		return `${this.baseUrl}/image/upload/${transformations.join(',')}/${source}`
+		return `${this.baseUrl}/image/upload/${transformations.join(',')}/${safeSource}`
 	}
 
 	/**
@@ -243,6 +276,8 @@ export class CDNImageAdapter extends BaseImageAdapter {
 			height?: number
 		},
 	): string {
+		const safeSource = this.sanitizeSource(source)
+
 		const searchParams = new URLSearchParams()
 		searchParams.set('format', params.format)
 		searchParams.set('quality', params.quality.toString())
@@ -255,7 +290,7 @@ export class CDNImageAdapter extends BaseImageAdapter {
 			searchParams.set('height', params.height.toString())
 		}
 
-		return `${this.baseUrl}/${source}?${searchParams.toString()}`
+		return `${this.baseUrl}/${safeSource}?${searchParams.toString()}`
 	}
 
 	/**
