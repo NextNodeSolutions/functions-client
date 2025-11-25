@@ -143,19 +143,53 @@ export function validateCacheHash(hash: string): boolean {
 /**
  * Sanitize filename to prevent directory traversal and injection
  * Removes dangerous characters while preserving valid filename structure
+ * Handles multi-byte characters (emoji) and preserves extension when truncating
  */
 export function sanitizeFilename(filename: string): string {
-	return (
-		filename
-			// Replace invalid characters with underscore
-			.replace(/[^a-zA-Z0-9.-]/g, '_')
-			// Remove consecutive dots (directory traversal attempt)
-			.replace(/\.\.+/g, '.')
-			// Limit filename length (filesystem limits)
-			.substring(0, 255)
-			// Remove leading/trailing dots or dashes
-			.replace(/^[.-]+|[.-]+$/g, '')
-	)
+	// First pass: replace all invalid characters (including /)
+	const sanitized = filename
+		// Replace invalid characters with underscore (+ collapses consecutive)
+		.replace(/[^a-zA-Z0-9.-]+/g, '_')
+		// Remove consecutive dots (directory traversal attempt)
+		.replace(/\.\.+/g, '.')
+
+	// Extract extension after sanitization
+	const lastDotIndex = sanitized.lastIndexOf('.')
+	const hasExtension = lastDotIndex > 0
+	const extension = hasExtension ? sanitized.slice(lastDotIndex) : ''
+	const nameWithoutExt = hasExtension
+		? sanitized.slice(0, lastDotIndex)
+		: sanitized
+
+	// Clean up name part
+	let cleanName = nameWithoutExt
+		// Remove leading/trailing dots or dashes
+		.replace(/^[.-]+|[.-]+$/g, '')
+
+	// Truncate if needed, preserving extension
+	const maxNameLength = 255 - extension.length
+	if (cleanName.length > maxNameLength) {
+		cleanName = cleanName.substring(0, maxNameLength)
+	}
+
+	// Remove trailing dots/dashes that might appear after truncation
+	cleanName = cleanName.replace(/[.-]+$/g, '')
+
+	// Clean extension: remove if it's just a dot, otherwise clean trailing dots
+	let finalExtension = extension
+	if (finalExtension === '.') {
+		// Just a trailing dot, remove it
+		finalExtension = ''
+	} else if (finalExtension.length > 1) {
+		// Remove any trailing dots from extension
+		finalExtension = finalExtension.replace(/\.+$/g, '')
+		// Ensure it starts with a single dot if non-empty
+		if (finalExtension && !finalExtension.startsWith('.')) {
+			finalExtension = `.${finalExtension}`
+		}
+	}
+
+	return cleanName + finalExtension
 }
 
 /**

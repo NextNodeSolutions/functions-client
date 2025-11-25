@@ -159,17 +159,48 @@ export function mergeLQIPConfig(custom?: Partial<LQIPConfig>): LQIPConfig {
 }
 
 /**
+ * Validate data URI to prevent javascript: and malicious data: URIs
+ * @throws {Error} If URI is invalid or potentially dangerous
+ */
+function validateDataURI(uri: string): string {
+	// Block javascript: protocol
+	if (/^javascript:/i.test(uri)) {
+		throw new Error('Invalid data URI: javascript: protocol not allowed')
+	}
+
+	// Block data URIs that aren't images
+	if (/^data:(?!image\/)/i.test(uri)) {
+		throw new Error(
+			'Invalid data URI: only data:image/* MIME types allowed',
+		)
+	}
+
+	// Only allow data:image/* URIs or https:/http: URLs
+	if (!/^data:image\//i.test(uri) && !/^https?:\/\//i.test(uri)) {
+		throw new Error(
+			'Invalid URI: only data:image/*, https://, or http:// URLs allowed',
+		)
+	}
+
+	return uri
+}
+
+/**
  * Generate LQIP placeholder HTML element using DOM API (XSS-safe)
  * Replaces string concatenation with secure DOM element creation
+ * @throws {Error} If dataURI is invalid or potentially dangerous
  */
 export function generateLQIPElement(
 	dataURI: string,
 	alt: string,
 	config: LQIPConfig,
 ): HTMLImageElement {
+	// Validate URI before use to prevent XSS
+	const safeURI = validateDataURI(dataURI)
+
 	const img = document.createElement('img')
 
-	img.src = dataURI
+	img.src = safeURI
 	img.alt = alt
 	img.className = 'lqip-placeholder'
 	img.loading = 'lazy'
@@ -180,19 +211,6 @@ export function generateLQIPElement(
 	})
 
 	return img
-}
-
-/**
- * Generate LQIP placeholder HTML string (deprecated, use generateLQIPElement)
- * @deprecated Use generateLQIPElement() instead for XSS safety
- */
-export function generateLQIPHTML(
-	dataURI: string,
-	alt: string,
-	config: LQIPConfig,
-): string {
-	const img = generateLQIPElement(dataURI, alt, config)
-	return img.outerHTML
 }
 
 /**

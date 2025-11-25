@@ -359,7 +359,8 @@ describe('Base Adapter Security - DoS Protection', () => {
 		})
 
 		it('should have defined MAX_PIXELS', () => {
-			expect(SECURITY_LIMITS.MAX_PIXELS).toBe(100 * 1024 * 1024)
+			// 50 mebipixels - prevents MAX_WIDTH × MAX_HEIGHT simultaneously
+			expect(SECURITY_LIMITS.MAX_PIXELS).toBe(50 * 1024 * 1024)
 		})
 
 		it('should have defined MAX_FILE_SIZE', () => {

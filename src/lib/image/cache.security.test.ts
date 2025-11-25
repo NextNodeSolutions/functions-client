@@ -172,8 +172,9 @@ describe('Cache Security', () => {
 			})
 
 			it('should replace invalid shell characters', () => {
+				// Consecutive invalid chars collapsed to single underscore (better security)
 				expect(sanitizeFilename('file;rm -rf *.jpg')).toBe(
-					'file_rm_-rf__.jpg',
+					'file_rm_-rf_.jpg',
 				)
 			})
 
@@ -214,12 +215,14 @@ describe('Cache Security', () => {
 			})
 
 			it('should replace unicode characters', () => {
+				// Unicode chars collapsed to single underscore with +
 				expect(sanitizeFilename('fichier_été.jpg')).toBe(
-					'fichier__t_.jpg',
+					'fichier_t_.jpg',
 				)
 			})
 
 			it('should handle emoji', () => {
+				// Emoji (multi-byte) collapsed to single underscore with +
 				expect(sanitizeFilename('image😀.jpg')).toBe('image_.jpg')
 			})
 		})
@@ -255,7 +258,8 @@ describe('Cache Security', () => {
 			})
 
 			it('should handle only invalid characters', () => {
-				expect(sanitizeFilename('///')).toBe('___')
+				// Consecutive invalid chars collapsed to single underscore with +
+				expect(sanitizeFilename('///')).toBe('_')
 			})
 
 			it('should handle filename with no extension', () => {
@@ -373,7 +377,8 @@ describe('Cache Security', () => {
 					generateSecureCacheKey('///', validHash),
 				).not.toThrow()
 				const key = generateSecureCacheKey('///', validHash)
-				expect(key).toBe(`___-${validHash}`)
+				// Consecutive invalid chars collapsed to single underscore
+				expect(key).toBe(`_-${validHash}`)
 			})
 		})
 

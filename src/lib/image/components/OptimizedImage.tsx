@@ -186,6 +186,36 @@ export function OptimizedPicture({
 }
 
 /**
+ * Validate image URL for safe use in CSS
+ * @throws {Error} If URL is invalid or potentially dangerous
+ */
+function validateImageURL(url: string): string {
+	// Block javascript: protocol
+	if (/^javascript:/i.test(url)) {
+		throw new Error('Invalid image URL: javascript: protocol not allowed')
+	}
+
+	// Block data URIs that aren't images
+	if (/^data:(?!image\/)/i.test(url)) {
+		throw new Error('Invalid image URL: only data:image/* allowed')
+	}
+
+	// Only allow: data:image/*, https://, http://, or relative paths
+	const isValid =
+		/^data:image\//i.test(url) ||
+		/^https?:\/\//i.test(url) ||
+		/^\//.test(url)
+
+	if (!isValid) {
+		throw new Error(
+			'Invalid image URL: must be data:image/*, https://, http://, or relative path',
+		)
+	}
+
+	return url
+}
+
+/**
  * Background Image component for hero sections
  * Uses CSS background-image with lazy loading
  *
@@ -229,8 +259,11 @@ export function OptimizedBackgroundImage({
 		rootMargin: '100px',
 	})
 
+	// Validate URLs before use in CSS to prevent injection
+	const safeImageSrc = validateImageURL(lazy.src)
+
 	const combinedStyle: React.CSSProperties = {
-		backgroundImage: `url(${lazy.src})`,
+		backgroundImage: `url(${safeImageSrc})`,
 		backgroundSize: 'cover',
 		backgroundPosition: 'center',
 		...style,

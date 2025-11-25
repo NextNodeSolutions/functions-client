@@ -19,8 +19,12 @@ export const SECURITY_LIMITS = {
 	MAX_WIDTH: 10000,
 	/** Maximum image height: 10000px */
 	MAX_HEIGHT: 10000,
-	/** Maximum total pixels (width * height): 100 megapixels */
-	MAX_PIXELS: 100 * 1024 * 1024,
+	/**
+	 * Maximum total pixels (width * height): 50 mebipixels
+	 * Prevents MAX_WIDTH × MAX_HEIGHT (100M pixels) from being allowed
+	 * Individual dimensions can be at max, but not both simultaneously
+	 */
+	MAX_PIXELS: 50 * 1024 * 1024,
 } as const
 
 /**
