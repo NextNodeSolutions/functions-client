@@ -159,19 +159,40 @@ export function mergeLQIPConfig(custom?: Partial<LQIPConfig>): LQIPConfig {
 }
 
 /**
- * Generate LQIP placeholder HTML with inline styles
+ * Generate LQIP placeholder HTML element using DOM API (XSS-safe)
+ * Replaces string concatenation with secure DOM element creation
+ */
+export function generateLQIPElement(
+	dataURI: string,
+	alt: string,
+	config: LQIPConfig,
+): HTMLImageElement {
+	const img = document.createElement('img')
+
+	img.src = dataURI
+	img.alt = alt
+	img.className = 'lqip-placeholder'
+	img.loading = 'lazy'
+
+	const styles = getLQIPStyles(config)
+	Object.entries(styles).forEach(([key, value]) => {
+		img.style.setProperty(key, value)
+	})
+
+	return img
+}
+
+/**
+ * Generate LQIP placeholder HTML string (deprecated, use generateLQIPElement)
+ * @deprecated Use generateLQIPElement() instead for XSS safety
  */
 export function generateLQIPHTML(
 	dataURI: string,
 	alt: string,
 	config: LQIPConfig,
 ): string {
-	const styles = getLQIPStyles(config)
-	const styleString = Object.entries(styles)
-		.map(([key, value]) => `${key}: ${value}`)
-		.join('; ')
-
-	return `<img src="${dataURI}" alt="${alt}" style="${styleString}" class="lqip-placeholder" />`
+	const img = generateLQIPElement(dataURI, alt, config)
+	return img.outerHTML
 }
 
 /**
