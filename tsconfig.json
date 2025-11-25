@@ -14,6 +14,9 @@
 		// Temporarily disable for image library compatibility
 		"exactOptionalPropertyTypes": false,
 
+		// DOM types for React components
+		"lib": ["ES2022", "DOM", "DOM.Iterable"],
+
 		// Types
 		"types": ["node", "vitest/globals"]
 	},

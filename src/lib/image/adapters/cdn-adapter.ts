@@ -1,9 +1,7 @@
-// @ts-nocheck
 /**
  * CDN image optimization adapter
  * Generates optimized URLs for popular CDN providers
  * Supports Cloudflare Images, Imgix, and generic CDN patterns
- * TODO: Fix TypeScript strict optional property errors
  */
 
 import type {

@@ -1,8 +1,6 @@
-// @ts-nocheck
 /**
  * LQIP (Low Quality Image Placeholder) generation utilities
  * Implements 2025 best practices for blur placeholders
- * TODO: Fix TypeScript strict mode errors with array access
  */
 
 import type { LQIPConfig } from '../types.js'
@@ -132,9 +130,15 @@ export function calculateDominantColor(imageData: Uint8ClampedArray): {
 
 	// Calculate average color (simple dominant color approximation)
 	for (let i = 0; i < imageData.length; i += 4) {
-		r += imageData[i]
-		g += imageData[i + 1]
-		b += imageData[i + 2]
+		const red = imageData[i]
+		const green = imageData[i + 1]
+		const blue = imageData[i + 2]
+
+		if (red !== undefined && green !== undefined && blue !== undefined) {
+			r += red
+			g += green
+			b += blue
+		}
 	}
 
 	return {
