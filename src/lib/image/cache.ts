@@ -129,3 +129,51 @@ export function getCacheStrategyForAsset(
 		immutable: false,
 	}
 }
+
+/**
+ * Validate cache hash format
+ * Ensures hash is a valid SHA-256 hex string (64 characters)
+ * Prevents cache poisoning attacks through invalid hashes
+ */
+export function validateCacheHash(hash: string): boolean {
+	return /^[a-f0-9]{64}$/i.test(hash)
+}
+
+/**
+ * Sanitize filename to prevent directory traversal and injection
+ * Removes dangerous characters while preserving valid filename structure
+ */
+export function sanitizeFilename(filename: string): string {
+	return (
+		filename
+			// Replace invalid characters with underscore
+			.replace(/[^a-zA-Z0-9.-]/g, '_')
+			// Remove consecutive dots (directory traversal attempt)
+			.replace(/\.\.+/g, '.')
+			// Limit filename length (filesystem limits)
+			.substring(0, 255)
+			// Remove leading/trailing dots or dashes
+			.replace(/^[.-]+|[.-]+$/g, '')
+	)
+}
+
+/**
+ * Generate secure cache key from filename and hash
+ * Validates inputs to prevent cache poisoning
+ */
+export function generateSecureCacheKey(filename: string, hash: string): string {
+	if (!validateCacheHash(hash)) {
+		throw new Error(
+			'Invalid cache hash: must be 64-character SHA-256 hex string',
+		)
+	}
+
+	const safeFilename = sanitizeFilename(filename)
+	if (!safeFilename) {
+		throw new Error(
+			'Invalid filename: sanitization resulted in empty string',
+		)
+	}
+
+	return `${safeFilename}-${hash}`
+}
