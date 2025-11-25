@@ -6,6 +6,7 @@
 import type { Logger } from '@nextnode/logger'
 import { createLogger } from '@nextnode/logger'
 
+import { ImageProcessingError, ImageValidationError } from '../errors.js'
 import type {
 	BatchOptimizationResult,
 	ImageOptimizationOptions,
@@ -125,8 +126,9 @@ export abstract class BaseImageAdapter implements ImageAdapter {
 		}
 
 		if (Buffer.isBuffer(source)) {
-			throw new Error(
+			throw new ImageProcessingError(
 				'Buffer sources must be handled by adapter implementation',
+				{ sourceType: 'buffer' },
 			)
 		}
 
@@ -156,14 +158,24 @@ export abstract class BaseImageAdapter implements ImageAdapter {
 	 */
 	protected validateDimensions(width?: number, height?: number): void {
 		if (width !== undefined && width > SECURITY_LIMITS.MAX_WIDTH) {
-			throw new Error(
+			throw new ImageValidationError(
 				`Image width ${width}px exceeds maximum allowed: ${SECURITY_LIMITS.MAX_WIDTH}px`,
+				{
+					width,
+					maxWidth: SECURITY_LIMITS.MAX_WIDTH,
+					reason: 'width_exceeded',
+				},
 			)
 		}
 
 		if (height !== undefined && height > SECURITY_LIMITS.MAX_HEIGHT) {
-			throw new Error(
+			throw new ImageValidationError(
 				`Image height ${height}px exceeds maximum allowed: ${SECURITY_LIMITS.MAX_HEIGHT}px`,
+				{
+					height,
+					maxHeight: SECURITY_LIMITS.MAX_HEIGHT,
+					reason: 'height_exceeded',
+				},
 			)
 		}
 
@@ -172,8 +184,15 @@ export abstract class BaseImageAdapter implements ImageAdapter {
 			height !== undefined &&
 			width * height > SECURITY_LIMITS.MAX_PIXELS
 		) {
-			throw new Error(
+			throw new ImageValidationError(
 				`Image dimensions ${width}x${height} (${width * height} pixels) exceed maximum allowed: ${SECURITY_LIMITS.MAX_PIXELS} pixels`,
+				{
+					width,
+					height,
+					pixels: width * height,
+					maxPixels: SECURITY_LIMITS.MAX_PIXELS,
+					reason: 'pixels_exceeded',
+				},
 			)
 		}
 	}

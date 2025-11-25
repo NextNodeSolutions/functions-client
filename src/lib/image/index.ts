@@ -9,6 +9,8 @@ export * from './adapters/index.js'
 export * from './cache.js'
 // React components and hooks
 export * from './components/index.js'
+// Error classes
+export * from './errors.js'
 // Types (excluding OptimizedImage to avoid conflict with component)
 // Export OptimizedImage type with alias to avoid conflict
 export type {

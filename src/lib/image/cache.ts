@@ -3,6 +3,7 @@
  * Based on best practices for CDN and browser caching
  */
 
+import { ImageConfigError } from './errors.js'
 import type { CacheStrategyConfig } from './types.js'
 
 /**
@@ -163,15 +164,17 @@ export function sanitizeFilename(filename: string): string {
  */
 export function generateSecureCacheKey(filename: string, hash: string): string {
 	if (!validateCacheHash(hash)) {
-		throw new Error(
+		throw new ImageConfigError(
 			'Invalid cache hash: must be 64-character SHA-256 hex string',
+			{ hash, hashLength: hash.length, expectedLength: 64 },
 		)
 	}
 
 	const safeFilename = sanitizeFilename(filename)
 	if (!safeFilename) {
-		throw new Error(
+		throw new ImageConfigError(
 			'Invalid filename: sanitization resulted in empty string',
+			{ originalFilename: filename },
 		)
 	}
 

@@ -4,6 +4,7 @@
  * Supports Cloudflare Images, Imgix, and generic CDN patterns
  */
 
+import { ImageSecurityError } from '../errors.js'
 import type {
 	ImageFormat,
 	ImageOptimizationOptions,
@@ -141,19 +142,32 @@ export class CDNImageAdapter extends BaseImageAdapter {
 	private sanitizeSource(source: string): string {
 		// Block path traversal attempts
 		if (source.includes('../') || source.includes('..\\')) {
-			throw new Error('Path traversal detected in image source')
+			throw new ImageSecurityError(
+				'Path traversal detected in image source',
+				{
+					source,
+					reason: 'directory_traversal',
+				},
+			)
 		}
 
 		// Block absolute paths (should be relative to CDN base)
 		if (source.startsWith('/')) {
-			throw new Error('Absolute paths not allowed, use relative paths')
+			throw new ImageSecurityError(
+				'Absolute paths not allowed, use relative paths',
+				{
+					source,
+					reason: 'absolute_path',
+				},
+			)
 		}
 
 		// Validate it looks like an image path (basic extension check)
 		const validExtensions = /\.(jpg|jpeg|png|webp|avif|gif|svg)$/i
 		if (!validExtensions.test(source)) {
-			throw new Error(
+			throw new ImageSecurityError(
 				'Invalid image source: must have valid image extension',
+				{ source, reason: 'invalid_extension' },
 			)
 		}
 
