@@ -24,6 +24,20 @@ import { BaseImageAdapter } from './base-adapter.js'
 export type CDNProvider = 'cloudflare' | 'imgix' | 'cloudinary' | 'generic'
 
 /**
+ * URL builder configuration for different CDN providers
+ */
+interface URLBuilderConfig {
+	formatKey: string
+	qualityKey: string
+	widthKey: string
+	heightKey: string
+	useQueryParams: boolean
+	pathTemplate?: string
+	separator?: string
+	additionalParams?: Record<string, string>
+}
+
+/**
  * CDN adapter configuration
  */
 export interface CDNAdapterConfig {
@@ -148,7 +162,52 @@ export class CDNImageAdapter extends BaseImageAdapter {
 	}
 
 	/**
-	 * Build CDN transformation URL
+	 * Get URL builder configuration for current provider
+	 */
+	private getURLBuilderConfig(): URLBuilderConfig {
+		switch (this.provider) {
+			case 'cloudflare':
+				return {
+					formatKey: 'format=',
+					qualityKey: 'quality=',
+					widthKey: 'width=',
+					heightKey: 'height=',
+					useQueryParams: false,
+					pathTemplate: '/cdn-cgi/image/{params}/{source}',
+					separator: ',',
+				}
+			case 'imgix':
+				return {
+					formatKey: 'fm',
+					qualityKey: 'q',
+					widthKey: 'w',
+					heightKey: 'h',
+					useQueryParams: true,
+					additionalParams: { auto: 'compress,format' },
+				}
+			case 'cloudinary':
+				return {
+					formatKey: 'f_',
+					qualityKey: 'q_',
+					widthKey: 'w_',
+					heightKey: 'h_',
+					useQueryParams: false,
+					pathTemplate: '/image/upload/{params}/{source}',
+					separator: ',',
+				}
+			default:
+				return {
+					formatKey: 'format',
+					qualityKey: 'quality',
+					widthKey: 'width',
+					heightKey: 'height',
+					useQueryParams: true,
+				}
+		}
+	}
+
+	/**
+	 * Build CDN transformation URL using unified logic
 	 */
 	private buildCDNUrl(
 		source: string,
@@ -159,25 +218,20 @@ export class CDNImageAdapter extends BaseImageAdapter {
 			height?: number
 		},
 	): string {
-		switch (this.provider) {
-			case 'cloudflare':
-				return this.buildCloudflareUrl(source, params)
-			case 'imgix':
-				return this.buildImgixUrl(source, params)
-			case 'cloudinary':
-				return this.buildCloudinaryUrl(source, params)
-			case 'generic':
-			default:
-				return this.buildGenericUrl(source, params)
+		const safeSource = this.sanitizeSource(source)
+		const config = this.getURLBuilderConfig()
+
+		if (config.useQueryParams) {
+			return this.buildQueryParamURL(safeSource, params, config)
 		}
+
+		return this.buildPathBasedURL(safeSource, params, config)
 	}
 
 	/**
-	 * Cloudflare Images URL builder
-	 * Format: https://imagedelivery.net/{account_id}/{image_id}/{variant}
-	 * Or: /cdn-cgi/image/format=webp,quality=90,width=800/image.jpg
+	 * Build URL with query parameters (Imgix, Generic)
 	 */
-	private buildCloudflareUrl(
+	private buildQueryParamURL(
 		source: string,
 		params: {
 			format: ImageFormat
@@ -185,115 +239,66 @@ export class CDNImageAdapter extends BaseImageAdapter {
 			width?: number
 			height?: number
 		},
+		config: URLBuilderConfig,
 	): string {
-		const safeSource = this.sanitizeSource(source)
+		const searchParams = new URLSearchParams()
+		searchParams.set(config.formatKey, params.format)
+		searchParams.set(config.qualityKey, params.quality.toString())
 
+		if (config.additionalParams) {
+			for (const [key, value] of Object.entries(
+				config.additionalParams,
+			)) {
+				searchParams.set(key, value)
+			}
+		}
+
+		if (params.width) {
+			searchParams.set(config.widthKey, params.width.toString())
+		}
+
+		if (params.height) {
+			searchParams.set(config.heightKey, params.height.toString())
+		}
+
+		return `${this.baseUrl}/${source}?${searchParams.toString()}`
+	}
+
+	/**
+	 * Build URL with path-based transformations (Cloudflare, Cloudinary)
+	 */
+	private buildPathBasedURL(
+		source: string,
+		params: {
+			format: ImageFormat
+			quality: number
+			width?: number
+			height?: number
+		},
+		config: URLBuilderConfig,
+	): string {
 		const transformations: string[] = [
-			`format=${params.format}`,
-			`quality=${params.quality}`,
+			`${config.formatKey}${params.format}`,
+			`${config.qualityKey}${params.quality}`,
 		]
 
 		if (params.width) {
-			transformations.push(`width=${params.width}`)
+			transformations.push(`${config.widthKey}${params.width}`)
 		}
 
 		if (params.height) {
-			transformations.push(`height=${params.height}`)
+			transformations.push(`${config.heightKey}${params.height}`)
 		}
 
-		return `${this.baseUrl}/cdn-cgi/image/${transformations.join(',')}/${safeSource}`
-	}
+		const paramsString = transformations.join(config.separator || ',')
 
-	/**
-	 * Imgix URL builder
-	 * Format: https://domain.imgix.net/image.jpg?w=800&fm=webp&q=90
-	 */
-	private buildImgixUrl(
-		source: string,
-		params: {
-			format: ImageFormat
-			quality: number
-			width?: number
-			height?: number
-		},
-	): string {
-		const safeSource = this.sanitizeSource(source)
-
-		const searchParams = new URLSearchParams()
-		searchParams.set('fm', params.format)
-		searchParams.set('q', params.quality.toString())
-		searchParams.set('auto', 'compress,format')
-
-		if (params.width) {
-			searchParams.set('w', params.width.toString())
+		if (config.pathTemplate) {
+			return `${this.baseUrl}${config.pathTemplate
+				.replace('{params}', paramsString)
+				.replace('{source}', source)}`
 		}
 
-		if (params.height) {
-			searchParams.set('h', params.height.toString())
-		}
-
-		return `${this.baseUrl}/${safeSource}?${searchParams.toString()}`
-	}
-
-	/**
-	 * Cloudinary URL builder
-	 * Format: https://res.cloudinary.com/{cloud_name}/image/upload/f_webp,q_90,w_800/image.jpg
-	 */
-	private buildCloudinaryUrl(
-		source: string,
-		params: {
-			format: ImageFormat
-			quality: number
-			width?: number
-			height?: number
-		},
-	): string {
-		const safeSource = this.sanitizeSource(source)
-
-		const transformations: string[] = [
-			`f_${params.format}`,
-			`q_${params.quality}`,
-		]
-
-		if (params.width) {
-			transformations.push(`w_${params.width}`)
-		}
-
-		if (params.height) {
-			transformations.push(`h_${params.height}`)
-		}
-
-		return `${this.baseUrl}/image/upload/${transformations.join(',')}/${safeSource}`
-	}
-
-	/**
-	 * Generic CDN URL builder
-	 * Uses query parameters (compatible with most CDNs)
-	 */
-	private buildGenericUrl(
-		source: string,
-		params: {
-			format: ImageFormat
-			quality: number
-			width?: number
-			height?: number
-		},
-	): string {
-		const safeSource = this.sanitizeSource(source)
-
-		const searchParams = new URLSearchParams()
-		searchParams.set('format', params.format)
-		searchParams.set('quality', params.quality.toString())
-
-		if (params.width) {
-			searchParams.set('width', params.width.toString())
-		}
-
-		if (params.height) {
-			searchParams.set('height', params.height.toString())
-		}
-
-		return `${this.baseUrl}/${safeSource}?${searchParams.toString()}`
+		return `${this.baseUrl}/${paramsString}/${source}`
 	}
 
 	/**
