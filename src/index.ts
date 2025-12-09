@@ -5,6 +5,9 @@
 
 // Core functionality
 export * from './lib/core.js'
+// Image optimization library
+// Use: import { OptimizedImage, ... } from '@nextnode/functions-client/image'
+export * from './lib/image/index.js'
 // Type definitions
 export * from './types/index.js'
 // Utility functions
